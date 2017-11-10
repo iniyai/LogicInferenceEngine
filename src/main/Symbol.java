@@ -9,11 +9,20 @@ public class Symbol {
 		this.constVal = val;
 		char firstLetter = val.charAt(0);
 		isConstant = ((firstLetter >= 'A') && (firstLetter <= 'Z'));
+		//		if (!isConstant) {
+		//			this.constVal += Integer.toString(counter);
+		//			counter++;
+		//		}
 	}
 
 	public void setSymbol(Symbol symbol) {
 		this.constVal = symbol.constVal;
 		this.isConstant = symbol.isConstant;
+	}
+
+	public void setSymbol(String s) {
+		this.constVal = s;
+		this.isConstant = ((s.charAt(0) >= 'A') && (s.charAt(0) <= 'Z'));
 	}
 
 	public Symbol(Symbol symbol) {

@@ -2,12 +2,15 @@ package main;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class Predicate {
 	private static final String PREDICATE_VARIABLES = "[(),]";
 	public String name;
 	public Symbol[] arguments;
+	public Set<String> variables;
 	public boolean isNegated = false;
 
 	public Predicate(String name, Symbol[] arguments, boolean isNegated) {
@@ -23,6 +26,33 @@ public class Predicate {
 		constructPredicate(pred);
 	}
 
+	public void standardize(Map<String, String> varHash) {
+		for (int i = 0; i < arguments.length; i++) {
+			if (varHash.containsKey(arguments[i].sName())) {
+				arguments[i].setSymbol(varHash.get(arguments[i].sName()));
+			}
+		}
+	}
+
+	public boolean isContradict(Predicate that) { // return true if the names contradict
+		if (!this.name.equals(that.name)) {
+			//System.out.println(this.name + " " + that.name);
+			return false;
+		}
+		if ((this.isNegated && that.isNegated) || (!this.isNegated && !that.isNegated)) {
+			//System.out.println(this.isNegated + " " + that.isNegated);
+			return false;
+		}
+		for (int i = 0; i < arguments.length; i++) {
+			//System.out.println(this.arguments[i] + " " + that.arguments[i]);
+			if (arguments[i].isConst() && that.arguments[i].isConst()
+					&& !(arguments[i].sName().equals(that.arguments[i].sName()))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	void constructPredicate(String pred) {
 		if (pred.charAt(0) == '~') {
 			isNegated = true;
@@ -32,8 +62,12 @@ public class Predicate {
 		//System.out.println(arr.length);
 		name = arr[0];
 		arguments = new Symbol[arr.length - 1];
+		variables = new HashSet<String>();
 		for (int i = 1; i < arr.length; i++) {
 			arguments[i - 1] = new Symbol(arr[i]);
+			if (!arguments[i - 1].isConst()) {
+				variables.add(arguments[i - 1].sName());
+			}
 		}
 	}
 
@@ -84,10 +118,25 @@ public class Predicate {
 	}
 
 	public void print() {
-		System.out.println("Name is: " + isNegated + name);
+		//System.out.println("******");
+		System.out.print((isNegated ? "~" : "") + name + "(");
 		for (int i = 0; i < arguments.length; i++) {
-			System.out.println(i + " " + arguments[i]);
+			System.out.print(arguments[i].sName() + ",");
 		}
+		System.out.print(")");
+		//System.out.println("******");
+	}
+
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		//System.out.println("******");
+		sb.append((isNegated ? "~" : "") + name + "(");
+		for (int i = 0; i < arguments.length; i++) {
+			sb.append(arguments[i].sName() + ",");
+		}
+		sb.append(")");
+		//System.out.println("******");
+		return sb.toString();
 	}
 
 }
