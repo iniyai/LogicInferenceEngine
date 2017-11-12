@@ -1,6 +1,5 @@
 package main;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -80,12 +79,13 @@ public class Predicate {
 	}
 
 	// predicates have the same name, and one of them is the negation of the other.
-	public Map<String, String> unifyPredicate(Predicate that) {
+	public Map<String, String> unifyPredicate(Predicate that) throws UnifyException {
 		Map<String, String> varMap = new HashMap<String, String>();
 		for (int i = 0; i < this.arguments.length; i++) {
 			if (this.arguments[i].isConst()) {
-				if (that.arguments[i].isConst()) {
-					return null;
+				if (that.arguments[i].isConst() && !this.arguments[i].equals(that.arguments[i])) {
+					throw new UnifyException(
+							this.arguments[i].sName() + "cannot be unified with " + that.arguments[i].sName());
 				}
 				varMap.put(that.arguments[i].sName(), this.arguments[i].sName());
 			} else {
@@ -104,9 +104,20 @@ public class Predicate {
 		if (getClass() != obj.getClass())
 			return false;
 		Predicate other = (Predicate) obj;
-		if (!Arrays.equals(arguments, other.arguments)) {
+		if (arguments.length != other.arguments.length) {
 			return false;
 		}
+		for (int i = 0; i < arguments.length; i++) {
+			if (arguments[i].isConst() ^ other.arguments[i].isConst()) {
+				return false;
+			}
+			if (arguments[i].isConst() && other.arguments[i].isConst() && !arguments[i].equals(other.arguments[i])) {
+				return false;
+			}
+		}
+		//		if (!Arrays.equals(arguments, other.arguments)) {
+		//			return false;
+		//		}
 		if (isNegated != other.isNegated)
 			return false;
 		if (name == null) {
@@ -137,6 +148,38 @@ public class Predicate {
 		sb.append(")");
 		//System.out.println("******");
 		return sb.toString();
+	}
+
+	public boolean isNegatedOf(Predicate obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Predicate other = (Predicate) obj;
+		if (arguments.length != other.arguments.length) {
+			return false;
+		}
+		for (int i = 0; i < arguments.length; i++) {
+			if (arguments[i].isConst() ^ other.arguments[i].isConst()) {
+				return false;
+			}
+			if (arguments[i].isConst() && other.arguments[i].isConst() && !arguments[i].equals(other.arguments[i])) {
+				return false;
+			}
+		}
+		//		if (!Arrays.equals(arguments, other.arguments)) {
+		//			return false;
+		//		}
+		if (isNegated = other.isNegated)
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		return true;
 	}
 
 }

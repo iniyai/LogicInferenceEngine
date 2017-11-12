@@ -44,9 +44,9 @@ public class KBTest {
 	@Test
 	public void ex1Assign() {
 		String[] stStrings = new String[] {
-				"F(x) | G(x)",
-				"~G(x) | H(x)",
-				"~H(x) | F(x)",
+				"F(x0) | G(x0)",
+				"~G(x1) | H(x1)",
+				"~H(x2) | F(x2)",
 				"~F(Joe)"
 		};
 		KB kb = new KB(stStrings);
@@ -67,5 +67,42 @@ public class KBTest {
 		boolean result = kb.resolve();
 		System.out.println(kb.statements.size());
 		Assert.assertTrue(result);
+	}
+
+	@Test
+	public void ex3Assign() {
+		String[] stStrings = new String[] {
+				"~F(x) | G(x)",
+				"~G(x) | H(x)",
+				"~H(x) | F(x)",
+				"~R(x) | H(x)",
+				"~A(x) | H(x)",
+				"~D(x,y) | H(x)",
+				"~R(x) | H(x)",
+				"~A(x) | H(x)",
+				"~D(x,y) | H(x)",
+				"~H(John)"
+		};
+		KB kb = new KB(stStrings);
+		boolean result = kb.resolve();
+		System.out.println(kb.statements.size());
+		Assert.assertTrue(result);
+	}
+
+	@Test
+	public void ex4Assign() {
+		String[] stStrings = new String[] {
+				"~A(x) | H(x)",
+				"~B(x,y) | ~C(x,y) | A(x)",
+				"B(John,Joe)",
+				"~D(x,y) | ~Q(y) | C(x,y)",
+				"Q(Joe)",
+				"D(John,Joe)",
+				"~H(John)"
+		};
+		KB kb = new KB(stStrings);
+		boolean result = kb.resolve();
+		System.out.println(kb.statements.size());
+		Assert.assertFalse(result);
 	}
 }

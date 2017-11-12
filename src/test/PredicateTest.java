@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import main.Predicate;
 import main.Symbol;
+import main.UnifyException;
 
 public class PredicateTest {
 
@@ -32,7 +33,7 @@ public class PredicateTest {
 	}
 
 	@Test
-	public void unifyConstVar() {
+	public void unifyConstVar() throws UnifyException {
 		Predicate p1 = new Predicate("F(G,a)");
 		Predicate p2 = new Predicate("F(y,X)");
 		Map<String, String> map = p1.unifyPredicate(p2);
@@ -43,7 +44,7 @@ public class PredicateTest {
 	}
 
 	@Test
-	public void unifyConstVar2() {
+	public void unifyConstVar2() throws UnifyException {
 		Predicate p1 = new Predicate("F(x,Alpha)");
 		Predicate p2 = new Predicate("F(y,z)");
 		Map<String, String> map = p1.unifyPredicate(p2);
@@ -53,17 +54,16 @@ public class PredicateTest {
 		Assert.assertEquals(expected, map);
 	}
 
-	@Test
-	public void unifyTwoConstants() {
+	@Test(expected = UnifyException.class)
+	public void unifyTwoConstants() throws UnifyException {
 		Predicate p1 = new Predicate("F(x,Alpha)");
 		Predicate p2 = new Predicate("F(x,Beta)");
 		Map<String, String> map = p1.unifyPredicate(p2);
-		Assert.assertNull(map);
 		//expected.put(new Symbol("x"), new Symbol("x"));
 	}
 
 	@Test
-	public void unifyTwoVariable() {
+	public void unifyTwoVariable() throws UnifyException {
 		Predicate p1 = new Predicate("F(x,a)");
 		Predicate p2 = new Predicate("F(y,x)");
 		Map<String, String> map = p1.unifyPredicate(p2);
@@ -74,7 +74,7 @@ public class PredicateTest {
 	}
 
 	@Test
-	public void contradictPredicates() {
+	public void contradictPredicates() throws UnifyException {
 		Predicate p1 = new Predicate("Mother(x,y)");
 		Predicate p2 = new Predicate("~Mother(y,z)");
 		Predicate p3 = new Predicate("Mother(Charlie,y)");

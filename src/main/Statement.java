@@ -46,6 +46,27 @@ public class Statement {
 		}
 	}
 
+	public void removeRedundant() {
+		for (int i = 0; i < predicates.size(); i++) {
+			for (int j = i + 1; j < predicates.size(); j++) {
+				if (predicates.get(i).equals(predicates.get(j))) {
+					predicates.remove(i);
+				}
+			}
+		}
+	}
+
+	public void inferTautology() {
+		for (int i = 0; i < predicates.size(); i++) {
+			for (int j = i + 1; j < predicates.size(); j++) {
+				if (predicates.get(i).equals(predicates.get(j))) {
+					predicates.remove(i);
+					predicates.remove(j);
+				}
+			}
+		}
+	}
+
 	public void standardizeVars() {
 		//System.out.println("Counter: " + counter);
 		Map<String, String> varHash = new HashMap<String, String>();
@@ -78,29 +99,35 @@ public class Statement {
 		for (Predicate first : this.predicates) {
 			for (Predicate second : that.predicates) {
 				if (first.isSamePredicate(second) && ((first.isNegated && !second.isNegated)
-						|| (!first.isNegated && second.isNegated))) {
-					Map<String, String> varMap = first.unifyPredicate(second);
-					if (varMap == null)
-						return null;
-					return unifyHelper(that, varMap, first.name);
+						|| (!first.isNegated && second.isNegated))) { // first unifies with second
+					Map<String, String> varMap;
+					//System.out.println("main: " + first.name);
+					try {
+						varMap = first.unifyPredicate(second);
+					} catch (UnifyException e) {
+						continue;
+					}
+					// something can be unified for sure
+					return unifyHelper(that, varMap, first.name, first.isNegated, first, second);
 				}
 			}
 		}
 		return null;
 	}
 
-	private Statement unifyHelper(Statement that, Map<String, String> varMap, String name) {
+	private Statement unifyHelper(Statement that, Map<String, String> varMap, String name, boolean firstBool,
+			Predicate first, Predicate second) {
 		Statement ret = new Statement();
 		List<Predicate> predList = new ArrayList<Predicate>();
 
-		//System.out.println(name);
-		//System.out.println("map: " + varMap.get("z"));
+		//System.out.println("helper" + name);
 
 		for (Predicate p : this.predicates) {
-			if (!p.name.equals(name)) {
+			//if (!(p.name.equals(name) && p.isNegated == firstBool)) {
+			if (!p.equals(first)) {
 				Predicate newPred = new Predicate(p.name, p.arguments, p.isNegated);
 				for (Symbol sym : newPred.arguments) {
-					if (varMap.containsKey(sym.sName())) {
+					if (!sym.isConst() && varMap.containsKey(sym.sName())) {
 						sym.setSymbol(varMap.get(sym.sName()));
 					}
 				}
@@ -109,14 +136,14 @@ public class Statement {
 		}
 
 		for (Predicate p : that.predicates) {
-			if (!p.name.equals(name)) {
+			//if (!(p.name.equals(name) && p.isNegated == !firstBool)) {
+			if (!p.equals(second)) {
 				Predicate newPred = new Predicate(p.name, p.arguments, p.isNegated);
 				//newPred.print();
-				for (int i = 0; i < newPred.arguments.length; i++) {
-					Symbol sym = newPred.arguments[i];
-					if (varMap.containsKey(sym.sName())) {
+				for (Symbol sym : newPred.arguments) {
+					if (!sym.isConst() && varMap.containsKey(sym.sName())) {
 						//System.out.println(sym.sName() + " &^$%%^ " + varMap.get(sym.sName()));
-						newPred.arguments[i].setSymbol(varMap.get(sym.sName()));
+						sym.setSymbol(varMap.get(sym.sName()));
 						//System.out.println("sName inside: " + sym.sName());
 					}
 				}
@@ -125,6 +152,7 @@ public class Statement {
 			}
 		}
 		ret.predicates = predList;
+		ret.removeRedundant();
 		return ret;
 	}
 

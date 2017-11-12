@@ -5,8 +5,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 public class homework {
 	private static final String INPUT_FILENAME = "input.txt";
@@ -21,8 +19,8 @@ public class homework {
 		int ns = 0;
 		double k1 = 0;
 		double k2 = 0;
-		String[] queries;
-		List<String> sentences = new ArrayList<String>();
+		String[] queries = null;
+		String[] statements = null;
 
 		try {
 			out = new PrintWriter(new FileWriter(OUTPUT_FILENAME));
@@ -36,9 +34,10 @@ public class homework {
 				queries[i] = query;
 			}
 			ns = Integer.valueOf(br.readLine());
+			statements = new String[ns + 1];
 			for (int i = 0; i < ns; i++) {
 				String s = br.readLine();
-				sentences.add(s);
+				statements[i] = s;
 			}
 
 		} catch (IOException e) {
@@ -62,13 +61,20 @@ public class homework {
 			}
 		}
 
-		solve(nq, ns, 1000, k1, k2); // Passing remaining time in milliseconds.
+		solve(nq, ns, queries, statements); // Passing remaining time in milliseconds.
 		out.close();
 	}
 
-	private static void solve(int n, int p, double budgetTime, double k1, double k2) {
+	private static void solve(int qs, int sts, String[] queries, String[] statements) {
 		long startTime = System.currentTimeMillis();
-		System.out.println(System.currentTimeMillis() - startTime);
+		for (int i = 0; i < qs; i++) {
+			statements[sts] = ((queries[i].charAt(0) == '~') ? queries[i].substring(1) : "~" + queries[i]);
+			KB kb = new KB(statements);
+			kb.print();
+			boolean result = kb.resolve();
+			out.println(result ? "FALSE" : "TRUE");
+		}
+		//System.out.println(System.currentTimeMillis() - startTime);
 	}
 
 }

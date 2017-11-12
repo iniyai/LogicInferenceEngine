@@ -75,16 +75,48 @@ public class StatementTest {
 	public void zzContradict() {
 		Statement s1 = new Statement("Ancestor(A,B)");
 		Statement s2 = new Statement("~Ancestor(A,B)");
-		Statement s3 = new Statement("Ancestor(x,B)");
+		Statement s3 = new Statement("Ancestor(x,B)"); //x18
 		Assert.assertTrue(s1.isContradict(s2));
 		Assert.assertTrue(s2.isContradict(s3));
 	}
 
 	@Test
 	public void zzzContradict() {
-		String s1 = "F(x) | G(x)"; //x18
-		String s2 = "~G(x)"; //x19
-		String s3 = "F(x)";
+		String s1 = "F(x) | G(x)"; //x19
+		String s2 = "~G(x)"; //x20
+		String s3 = "F(x20)";
+		checkUnifier(s1, s2, s3);
+	}
+
+	@Test
+	public void zzzzA() {
+		String s1 = "H(x) | ~H(x)"; //x21
+		String s2 = "~H(John)";
+		String s3 = "~H(John)";
+		checkUnifier(s1, s2, s3);
+	}
+
+	@Test
+	public void zzzzB() {
+		String s1 = "~A(John)";
+		String s2 = "~C(John,Joe) | A(John)";
+		String s3 = "~C(John,Joe)";
+		checkUnifier(s1, s2, s3);
+	}
+
+	@Test
+	public void zzzzC() {
+		String s1 = "D(John,Joe)";
+		String s2 = "~D(John,Joe) | ~D(x,John)"; //x22
+		String s3 = "~D(x22,John)";
+		checkUnifier(s1, s2, s3);
+	}
+
+	@Test
+	public void zzzzD() {
+		String s1 = "~H(Alice)"; //x23
+		String s2 = "~D(x,y) | H(y)";
+		String s3 = "~D(x,Alice)";
 		checkUnifier(s1, s2, s3);
 	}
 
