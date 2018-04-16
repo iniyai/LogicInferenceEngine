@@ -14,8 +14,11 @@ public class Statement {
 	public List<Predicate> predicates;
 	public Set<String> variables;
 	private static int counter = 0;
+	private static int nextId = 0;
+	public final int id;
 
 	public Statement(String input) {
+		id = nextId++;
 		predicates = new ArrayList<Predicate>();
 		variables = new HashSet<String>();
 		construct(input);
@@ -23,6 +26,7 @@ public class Statement {
 	}
 
 	public Statement(String input, boolean isTest) {
+		id = nextId++;
 		predicates = new ArrayList<Predicate>();
 		variables = new HashSet<String>();
 		construct(input);
@@ -32,6 +36,7 @@ public class Statement {
 	}
 
 	public Statement() {
+		id = nextId++;
 		predicates = new ArrayList<Predicate>();
 	}
 
@@ -136,15 +141,11 @@ public class Statement {
 		}
 
 		for (Predicate p : that.predicates) {
-			//if (!(p.name.equals(name) && p.isNegated == !firstBool)) {
 			if (!p.equals(second)) {
 				Predicate newPred = new Predicate(p.name, p.arguments, p.isNegated);
-				//newPred.print();
 				for (Symbol sym : newPred.arguments) {
 					if (!sym.isConst() && varMap.containsKey(sym.sName())) {
-						//System.out.println(sym.sName() + " &^$%%^ " + varMap.get(sym.sName()));
 						sym.setSymbol(varMap.get(sym.sName()));
-						//System.out.println("sName inside: " + sym.sName());
 					}
 				}
 				//System.out.println("sName outside: " + newPred.arguments[0].sName());
@@ -152,6 +153,11 @@ public class Statement {
 			}
 		}
 		ret.predicates = predList;
+		for (Predicate p : predList) {
+			if (p.hasSameVar()) {
+				return null;
+			}
+		}
 		ret.removeRedundant();
 		return ret;
 	}
@@ -165,15 +171,26 @@ public class Statement {
 		if (getClass() != obj.getClass())
 			return false;
 		Statement other = (Statement) obj;
+		Map<String, String> matchedVariables = new HashMap<String, String>();
+		Map<String, String> matched2Variables = new HashMap<String, String>();
 		if (predicates == null) {
 			if (other.predicates != null)
 				return false;
-		} else if (!predicates.equals(other.predicates))
-			return false;
+		} else {
+			if (predicates.size() != other.predicates.size()) {
+				return false;
+			}
+			for (int i = 0; i < predicates.size(); i++) {
+				if (!predicates.get(i).equals(other.predicates.get(i), matchedVariables, matched2Variables)) {
+					return false;
+				}
+			}
+		}
 		return true;
 	}
 
 	public void print() {
+		System.out.print(id + ": ");
 		for (Predicate p : predicates) {
 			p.print();
 			System.out.print(" | ");
@@ -183,6 +200,7 @@ public class Statement {
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
+		sb.append(id + ": ");
 		for (Predicate p : predicates) {
 			sb.append(p.toString());
 			sb.append(" | ");

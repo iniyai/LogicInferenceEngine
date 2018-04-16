@@ -33,7 +33,7 @@ public class KBTest {
 		String[] stStrings = new String[] {
 				"F(x) | G(x)",
 				"~F(x)",
-				"~G(x)"
+				"~G(A)"
 		};
 		KB kb = new KB(stStrings);
 		boolean result = kb.resolve();
@@ -101,6 +101,24 @@ public class KBTest {
 				"~H(John)"
 		};
 		KB kb = new KB(stStrings);
+		boolean result = kb.resolve();
+		System.out.println(kb.statements.size());
+		Assert.assertFalse(result);
+	}
+
+	//@Test
+	public void ex5Assign() {
+		String[] stStrings = new String[] {
+				"Mother(Liz,Charley)",
+				"Father(Charley,Billy)",
+				"~Mother(x,y) | Parent(x,y)",
+				"~Father(x,y) | Parent(x,y)",
+				"~Parent(x,y) | Ancestor(x,y)",
+				"~Parent(x,y) | ~Ancestor(y,z) | Ancestor(x,z)",
+				"~Ancestor(Liz,Billy)"
+		};
+		KB kb = new KB(stStrings);
+		kb.print();
 		boolean result = kb.resolve();
 		System.out.println(kb.statements.size());
 		Assert.assertFalse(result);

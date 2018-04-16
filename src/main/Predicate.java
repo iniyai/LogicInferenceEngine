@@ -81,18 +81,40 @@ public class Predicate {
 	// predicates have the same name, and one of them is the negation of the other.
 	public Map<String, String> unifyPredicate(Predicate that) throws UnifyException {
 		Map<String, String> varMap = new HashMap<String, String>();
+		boolean allVariables = true;
 		for (int i = 0; i < this.arguments.length; i++) {
 			if (this.arguments[i].isConst()) {
-				if (that.arguments[i].isConst() && !this.arguments[i].equals(that.arguments[i])) {
-					throw new UnifyException(
-							this.arguments[i].sName() + "cannot be unified with " + that.arguments[i].sName());
+				allVariables = false;
+				if (that.arguments[i].isConst()) {
+					if (!this.arguments[i].equals(that.arguments[i])) {
+						throw new UnifyException(
+								this.arguments[i].sName() + "cannot be unified with " + that.arguments[i].sName());
+					}
+				} else {
+					varMap.put(that.arguments[i].sName(), this.arguments[i].sName());
 				}
-				varMap.put(that.arguments[i].sName(), this.arguments[i].sName());
 			} else {
+				if (that.arguments[i].isConst()) {
+					allVariables = false;
+				}
 				varMap.put(this.arguments[i].sName(), that.arguments[i].sName());
 			}
 		}
+		if (allVariables) {
+			throw new UnifyException("No point in unifying two variables");
+		}
 		return varMap;
+	}
+
+	public boolean hasSameVar() {
+		for (int i = 0; i < arguments.length; i++) {
+			for (int j = i + 1; j < arguments.length; j++) {
+				if (arguments[i].equals(arguments[j])) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -115,9 +137,53 @@ public class Predicate {
 				return false;
 			}
 		}
-		//		if (!Arrays.equals(arguments, other.arguments)) {
-		//			return false;
-		//		}
+		if (isNegated != other.isNegated)
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		return true;
+	}
+
+	public boolean equals(Object obj, Map<String, String> varLMap, Map<String, String> varRMap) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Predicate other = (Predicate) obj;
+		if (arguments.length != other.arguments.length) {
+			return false;
+		}
+		for (int i = 0; i < arguments.length; i++) {
+			Symbol thisArg = arguments[i];
+			Symbol thatArg = other.arguments[i];
+			if (thisArg.isConst() ^ thatArg.isConst()) {
+				return false;
+			} else if (thisArg.isConst()) {
+				if (!thisArg.equals(thatArg))
+					return false;
+			} else {
+				//				System.out.println("Map");
+				//				System.out.println(varLMap);
+				//				System.out.println(varRMap);
+				//				System.out.println(thisArg);
+				//				System.out.println(thatArg);
+				if (varLMap.containsKey(thisArg.sName())) {
+					if (!thatArg.sName().equals(varLMap.get(thisArg.sName())))
+						return false;
+				} else if (varRMap.containsKey(thatArg.sName())) {
+					if (!thisArg.sName().equals(varRMap.get(thatArg.sName())))
+						return false;
+				} else {
+					varLMap.put(thisArg.sName(), thatArg.sName());
+					varRMap.put(thatArg.sName(), thisArg.sName());
+				}
+			}
+		}
 		if (isNegated != other.isNegated)
 			return false;
 		if (name == null) {
@@ -148,38 +214,6 @@ public class Predicate {
 		sb.append(")");
 		//System.out.println("******");
 		return sb.toString();
-	}
-
-	public boolean isNegatedOf(Predicate obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Predicate other = (Predicate) obj;
-		if (arguments.length != other.arguments.length) {
-			return false;
-		}
-		for (int i = 0; i < arguments.length; i++) {
-			if (arguments[i].isConst() ^ other.arguments[i].isConst()) {
-				return false;
-			}
-			if (arguments[i].isConst() && other.arguments[i].isConst() && !arguments[i].equals(other.arguments[i])) {
-				return false;
-			}
-		}
-		//		if (!Arrays.equals(arguments, other.arguments)) {
-		//			return false;
-		//		}
-		if (isNegated = other.isNegated)
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		return true;
 	}
 
 }

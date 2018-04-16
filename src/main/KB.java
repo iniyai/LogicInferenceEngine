@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KB {
+	private static final int MAX_TIME = 10 * 1000;
 	public List<Statement> statements;
+	public int counter = 0;
 
 	public KB(String[] KBStrings) {
 		statements = new ArrayList<Statement>();
@@ -14,13 +16,20 @@ public class KB {
 	}
 
 	public boolean resolve() {
-		System.out.println("resolve");
+		long startTime = System.currentTimeMillis();
+		//System.out.println("resolve");
 		//Queue<Statement> queue = new LinkedList<Statement>();
 		//queue.addAll(statements);
 		//while (!queue.isEmpty()) {
+		boolean newAddition = false;
+		//do {
+		newAddition = false;
 		for (int k = 0; k < statements.size(); k++) {
 			Statement s1 = statements.get(k);
-			for (int i = k + 1; i < statements.size(); i++) {
+			for (int i = 0; i < k; i++) {
+				if (System.currentTimeMillis() - startTime > MAX_TIME) {
+					return true;
+				}
 				final Statement s2 = statements.get(i);
 				//System.out.println("AAAAAAAAAAAS1");
 				//s1.print();
@@ -36,15 +45,19 @@ public class KB {
 					if (s3 != null)
 						//s3.print();
 						if (s3 != null) {
+							s1.print();
+							s2.print();
+							s3.print();
+							System.out.println("***********");
 							if (s3.resultContradict()) {
-								s1.print();
-								s2.print();
-								System.out.println("Falseeeeeeeeeeeeeeeeeeeeeeeee");
-								s3.print();
+								//								s1.print();
+								//								s2.print();
+								//								s3.print();
+								//								System.out.println("Falseeeeeeeeeeeeeeeeeeeeeeeee");
 								return false;
 							} else {
-								s3.print();
 								if (!statements.contains(s3)) {
+									newAddition = true;
 									statements.add(s3);
 									//queue.add(s3);
 								}

@@ -42,8 +42,8 @@ public class StatementTest {
 	@Test
 	public void unifyTwoVariables() {
 		String inp1 = "F(x,Alpha) | ~G(x)"; // x7
-		String inp2 = "G(y) | H(z)"; // y8, z9
-		String out = "F(y8,Alpha) | H(z9)";
+		String inp2 = "G(Y) | H(z)"; // y8, z9
+		String out = "F(Y,Alpha) | H(z9)";
 		checkUnifier(inp1, inp2, out);
 	}
 
@@ -83,8 +83,8 @@ public class StatementTest {
 	@Test
 	public void zzzContradict() {
 		String s1 = "F(x) | G(x)"; //x19
-		String s2 = "~G(x)"; //x20
-		String s3 = "F(x20)";
+		String s2 = "~G(X)"; //x20
+		String s3 = "F(X)";
 		checkUnifier(s1, s2, s3);
 	}
 
@@ -120,14 +120,37 @@ public class StatementTest {
 		checkUnifier(s1, s2, s3);
 	}
 
+	@Test
+	public void zzzzEquals() {
+		String s1 = "~Parent(x,y) | Ancestor(x,y)"; //x23
+		String s2 = "~Parent(x0,y2) | Ancestor(x0,y2)";
+		Assert.assertTrue(new Statement(s1).equals(new Statement(s2)));
+	}
+
+	@Test
+	public void zzzzF1() {
+		String s1 = "~Parent(x34,Charley) | Ancestor(x34,Billy)"; //x23
+		String s2 = "~Ancestor(Liz,Billy,)";
+		String s3 = "~Parent(Liz,Charley)";
+		checkUnifier(s1, s2, s3);
+	}
+
+	@Test
+	public void zzzzF2() {
+		String s1 = "~Ancestor(Charley,z8) | Ancestor(Liz,z8)"; //x23
+		String s2 = "~Parent(x4,y5) | Ancestor(x4,y5)";
+		String s3 = "Ancestor(Liz,z830) | ~Parent(Charley,z830)";
+		checkUnifier(s1, s2, s3);
+	}
+
 	private void checkUnifier(String inp1, String inp2, String out) {
 		Statement s1 = new Statement(inp1);
 		Statement s2 = new Statement(inp2);
 		Statement s3 = s1.unify(s2);
 		Statement expected = null;
 		if (!out.equals("")) {
-			//			System.out.println("actual");
-			//			s3.print();
+			System.out.println("actual");
+			s3.print();
 			//			System.out.println("expected");
 			expected = new Statement(out, true);
 			//expected.print();

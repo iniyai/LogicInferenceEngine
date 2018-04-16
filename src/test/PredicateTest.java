@@ -46,11 +46,11 @@ public class PredicateTest {
 	@Test
 	public void unifyConstVar2() throws UnifyException {
 		Predicate p1 = new Predicate("F(x,Alpha)");
-		Predicate p2 = new Predicate("F(y,z)");
+		Predicate p2 = new Predicate("F(Y,z)");
 		Map<String, String> map = p1.unifyPredicate(p2);
 		Map<String, String> expected = new HashMap<>();
 		expected.put("z", "Alpha");
-		expected.put("x", "y");
+		expected.put("x", "Y");
 		Assert.assertEquals(expected, map);
 	}
 
@@ -63,13 +63,20 @@ public class PredicateTest {
 	}
 
 	@Test
+	public void equalsCheck() {
+		Predicate p1 = new Predicate("~Parent(x6,y7)");
+		Predicate p2 = new Predicate("~Parent(x9,y7)");
+		Assert.assertTrue(p1.equals(p2));
+	}
+
+	@Test
 	public void unifyTwoVariable() throws UnifyException {
 		Predicate p1 = new Predicate("F(x,a)");
-		Predicate p2 = new Predicate("F(y,x)");
+		Predicate p2 = new Predicate("F(Y,X)");
 		Map<String, String> map = p1.unifyPredicate(p2);
 		Map<String, String> expected = new HashMap<>();
-		expected.put("a", "x");
-		expected.put("x", "y");
+		expected.put("a", "X");
+		expected.put("x", "Y");
 		Assert.assertEquals(expected, map);
 	}
 
